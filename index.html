@@ -972,15 +972,47 @@
     }
   };
 
-  // ============ ناوبری بین صفحات ============
-  function showPage(pageName) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const target = document.getElementById('page-' + pageName);
-    if (target) {
-      target.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  // ============ ناوبری بین صفحات با پشتیبانی از دکمه Back ============
+let currentPage = 'home';
+
+function showPage(pageName, fromHistory = false) {
+  // مخفی کردن همه صفحات
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  
+  // نمایش صفحه هدف
+  const target = document.getElementById('page-' + pageName);
+  if (target) {
+    target.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  // ذخیره در History مرورگر (اگر از دکمه Back نیومده باشیم)
+  if (!fromHistory) {
+    if (currentPage !== pageName) {
+      history.pushState({ page: pageName }, '', '#' + pageName);
+      currentPage = pageName;
+    }
+  } else {
+    currentPage = pageName;
+  }
+}
+
+// ============ پشتیبانی از دکمه Back مرورگر ============
+window.addEventListener('popstate', (event) => {
+  if (event.state && event.state.page) {
+    // برگشت به صفحه ذخیره شده
+    showPage(event.state.page, true);
+  } else {
+    // اگر state نداشتیم، به صفحه اصلی برگرد
+    showPage('home', true);
+  }
+});
+
+// ============ ذخیره صفحه اولیه ============
+if (!history.state) {
+  history.replaceState({ page: 'home' }, '', '#home');
+  currentPage = 'home';
+}
 
   // ============ انتخاب پلن و نمایش حجم‌ها ============
   function selectPlanType(planKey) {
